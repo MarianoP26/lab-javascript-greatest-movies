@@ -1,4 +1,4 @@
-// LEVEL 1
+import { array } from './data.js';
 
 // Exercise 1: Get the array of all directors.
 function getAllDirectors(array) {
