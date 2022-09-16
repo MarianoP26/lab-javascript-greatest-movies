@@ -13,24 +13,16 @@ function getMoviesFromDirector(array, director) {
 }
 
 // Exercise 3: Calculate the average of the films of a given director.
-function moviesAverageOfDirector(array, director) {
-  const initialValue = 0;
-  // 1st -> array films of a certain director
-  const certainDirectorFilms = array.filter(
-    (movies) => movies.director === director
-  );
-  // 2nd -> array.reduce() method to reduce down [] to just one total score & math.round() to return total of a director´s movies score w/only 2 decimals,
+function moviesAverageOfDirector(array) {
   return (
-    Math.round(
-      (certainDirectorFilms.reduce(
-        (total, next) => total + next.score,
-        initialValue
-      ) /
-        certainDirectorFilms.length) *
-        100
-    ) / 100
+    Math.round((array.reduce((total, next) => total + next.score,0) / array.length) * 100) / 100
   );
 }
+
+function dramaAverageScore(array) {
+  return Math.round(array.filter((movie) => movie.genre.includes("Drama")).reduce((total, next) => total + next.score, 0) / array.length);
+}
+
 
 // Exercise 4:  Alphabetic order by title
 function orderAlphabetically(array) {
@@ -41,6 +33,11 @@ function orderAlphabetically(array) {
   const moviesTitles = moviesByAlphaOrder.map((movies) => movies.title);
   return moviesTitles.slice(0, 20);
 }
+
+function orderAlphabetically2(array) {
+  return array.sort((a,b) => a.title.localeCompare(b.title)).map((movies) => movies.title).slice(0, 20);
+}
+
 // Exercise 5: Order by year, ascending
 function orderByYear(array) {
   const cloneMovieArray = [...array];
@@ -66,17 +63,13 @@ function moviesAverageByCategory(array, genre) {
 
 // Exercise 7: Modify the duration of movies to minutes
 function hoursToMinutes(array) {
-  /* 1st -> Deep cloning original array so that "duration" sub values are disconnected from original array. First, I
-  stringify [] and parse it right after.This method allows deep cloning w/out knowing its structure */
   const cloneMovieArray = JSON.parse(JSON.stringify(array));
   // 2nd -> Replace cloneMovieArray.duration from "#h #min" to "#" (minutes)
   return cloneMovieArray.map((movie) => {
     // Regex exp to remove letters from value
     movie.duration = movie.duration.replace(/\D+/gi, '');
-    movie.duration =
-      // string.charAt to target the hours value & slice(1) to select the minutes value
-      movie.duration.charAt(0) * 60 + Number(movie.duration.slice(1));
-
+    movie.duration = movie.duration.charAt(0) * 60 + Number(movie.duration.slice(1));
+    // string.charAt to target the hours value & slice(1) to select the minutes value
     return movie;
   });
 }
@@ -85,10 +78,9 @@ function hoursToMinutes(array) {
 
 // Exercise 8: Get the best film of a year
 function bestFilmOfYear(array, year) {
-  // 1st -> Deep cloning [] so that original is not update & the sub values are disconnected from original []
   const cloneMovieArray = JSON.parse(JSON.stringify(array));
   // 2nd -> Create [] w/movies from the same year
-  const sameYearMovies = cloneMovieArray.filter((movie) => movie.year === year);
+  const sameYearMovies = cloneMovieArray.map((movie) => movie.year === year);
   // 3rd -> Create [] w/same year movies' scores
   const sameYearMoviesScores = sameYearMovies.map((movie) => movie.score);
   // 4th -> Find highest score in the previous [].
@@ -98,6 +90,51 @@ function bestFilmOfYear(array, year) {
   // 5th -> Find bestFilmOfYear
   return sameYearMovies.filter((movie) => movie.score === bestScore);
 }
+
+function scoresAverage(moviesArray) {
+  let totalSum = 0;
+
+  const scores = moviesArray.map((movie) => movie.score);
+  for (let i = 0; i < scores.length; i++) {
+    totalSum = scores[i] + totalSum;
+  }
+  const accruedMovieScore = totalSum / moviesArray.length;
+  return accruedMovieScore.toFixed(2);
+}
+
+function bestFilmOfYear2(array) {
+  
+  if (array.length === 0) {
+    return null;
+  } else {
+    const moviesByYear = orderByYear(array);
+    // control variables
+    let lastCheckedYear = 0;
+    let biggestAverage = 0;
+    let bestYear = 0;
+    for (i = 0; i < moviesByYear.length; i++) {
+      if (moviesByYear[i].year > lastCheckedYear) {
+        // Filter by the year we are at
+        const justThisYearMovies = moviesByYear.filter(value => {
+          if (value.year === moviesByYear[i].year) {
+            return true;
+          } else {
+            return false;
+          }
+        });
+        // calculate average of the year and save rate and year
+        if (scoresAverage(justThisYearMovies) > biggestAverage) {
+          biggestAverage = scoresAverage(justThisYearMovies);
+          bestYear = moviesByYear[i].year;
+        }
+        lastCheckedYear = moviesByYear[i].year;
+      }
+    }
+    return `The best year was ${bestYear} with an average rate of ${biggestAverage}`;
+  }
+}
+
+console.log(bestFilmOfYear2(movies));
 
 // The following is required to make unit tests work.
 /* Environment setup. Do not modify the below code. */
